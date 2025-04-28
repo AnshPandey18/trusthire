@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String
+  role         String   @default("freelancer")
+  title        String?
+  bio          String?
+  skills       String[]
+  experience   String?
+  education    String?
+  portfolioUrl String?
+  linkedinUrl  String?
+  githubUrl    String?
+  hourlyRate   Float?
+  availability String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  projects     Project[] @relation("ClientProjects")
+  applications Application[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  skills      String[]
+  deliverables String[]
+  timeline    String
+  budget      Float
+  status      String   @default("open") // open, in_progress, completed
+  clientId    String
+  client      User     @relation("ClientProjects", fields: [clientId], references: [id])
+  milestones  Milestone[]
+  applications Application[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  amount      Float
+  dueDate     DateTime
+  status      String   @default("pending") // pending, completed, paid
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Application {
+  id          String   @id @default(cuid())
+  status      String   @default("pending") // pending, accepted, rejected
+  proposal    String
+  freelancerId String
+  freelancer  User     @relation(fields: [freelancerId], references: [id])
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+} 
